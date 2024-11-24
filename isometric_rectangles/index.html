@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", () => {
+                let canvas = document.getElementById("canvas");
+                let ctx = canvas.getContext("2d");
+                // Set canvas size
+                canvas.width = 400;
+                canvas.height = 400;
+
+                // Save the current context state
+                ctx.save();
+
+                // Apply simpler isometric transformation
+                ctx.translate(200, 50); // Move to center of canvas
+                ctx.scale(1, 0.5);      // Scale height
+                ctx.rotate(45 * Math.PI / 180); // Rotate by 45 degrees
+
+                // Begin drawing path
+                ctx.beginPath();
+                
+                // Draw a square at (0,0) instead of (150,150)
+                ctx.rect(0, 0, 100, 100);
+                
+                // Make fill color more visible
+                ctx.fillStyle = "white";
+                ctx.fill();
+                ctx.stroke();
+
+                // Restore the context to its original state
+                ctx.restore();
+                
+            })
+        </script>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+    </body>
+</html>
