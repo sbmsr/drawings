@@ -41,49 +41,61 @@
           }
         }
 
-        function drawCube(x, y, s = 1) {
+        function drawIsoRect({
+          x = 0,
+          y = 0,
+          l = 1,
+          w = 1,
+          h = 1,
+          c = { top: "rgba(0, 0, 255, 1)", left: "rgba(255, 0, 0, 1)", right: "rgba(0, 255, 0, 1)" }
+        } = {}) {
           // draw top (blue)
           ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x, y + 20 * s);
-          ctx.lineTo(x + 20 * s, y + 20 * s);
-          ctx.lineTo(x + 20 * s, y);
+          ctx.moveTo(x, y - h * 20);
+          ctx.lineTo(x, y + 20 * w - h * 20);
+          ctx.lineTo(x + 20 * l, y + 20 * w - h * 20);
+          ctx.lineTo(x + 20 * l, y - h * 20);
           ctx.closePath();
-          ctx.fillStyle = "rgba(0, 0, 255, 1)";
+          ctx.fillStyle = c.top;
           ctx.fill();
           ctx.stroke();
 
           // draw left (red)
           ctx.beginPath();
-          ctx.moveTo(x, y + 20 * s);
-          ctx.lineTo(x + 20 * s, y + 40 * s);
-          ctx.lineTo(x + 40 * s, y + 40 * s);
-          ctx.lineTo(x + 20 * s, y + 20 * s);
+          ctx.moveTo(x, y + 20 * w - h * 20);  // Start at top-left
+          ctx.lineTo(x + h * 20, y + 20 * w);  // Down and right to bottom-left
+          ctx.lineTo(x + 20 * l + h * 20, y + 20 * w);  // Across to bottom-right
+          ctx.lineTo(x + 20 * l, y + 20 * w - h * 20);  // Up and left to top-right
           ctx.closePath();
-          ctx.fillStyle = "rgba(255, 0, 0, 1)";
+          ctx.fillStyle = c.left;
           ctx.fill();
           ctx.stroke();
 
           // draw right (green)
           ctx.beginPath();
-          ctx.moveTo(x + 20 * s, y); // top left
-          ctx.lineTo(x + 40 * s, y + 20 * s); // bottom left
-          ctx.lineTo(x + 40 * s, y + 40 * s); // bottom right
-          ctx.lineTo(x + 20 * s, y + 20 * s); // top right
+          ctx.moveTo(x + 20 * l, y - h * 20);  // Start at top-left
+          ctx.lineTo(x + 20 * l + h * 20, y);  // Down and right to bottom-left
+          ctx.lineTo(x + 20 * l + h * 20, y + 20 * w);  // Down to bottom-right
+          ctx.lineTo(x + 20 * l, y + 20 * w - h * 20);  // Up and left to top-right
           ctx.closePath();
-          ctx.fillStyle = "rgba(0, 255, 0, 1)";
+          ctx.fillStyle = c.right;
           ctx.fill();
           ctx.stroke();
         }
 
         drawIsometricPlane();
 
-        let scale = 1;
         let growing = true;
 
         function draw() {
           drawIsometricPlane();
-          drawCube(-canvas.width / 2 - 10, -canvas.height / 2 - 10, scale);
+          {
+            // draw leg 1
+            drawIsoRect({x: 120, y:220, l:1, w:1,h: 3, c: { top: "red" }});
+            // drawIsoRect({x: 80, y: 180, l: 1, w: 1, c: { top: "red" }});
+            // drawIsoRect({x: 40, y: 140, l: 1, w: 1, c: { top: "red" }});
+            // drawIsoRect({x: 0, y: 100, l: 1, w: 1, c: { top: "red" }});
+          }
 
           //   setTimeout(draw, 10);
         }
