@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", () => {
+                let canvas = document.getElementById("canvas");
+                let ctx = canvas.getContext("2d");
+                // Set canvas size
+                canvas.width = 400;
+                canvas.height = 400;
+
+                // Save the current context state
+                ctx.save();
+
+                // Track the current angle
+                let angle = 45;
+                
+                function draw() {
+                    // Clear the previous drawing
+                    // ctx.clearRect(0,0, canvas.width, canvas.height);
+                    
+                    // Apply transformations
+                    ctx.translate(200, 200); // Move to center of canvas
+                    // ctx.scale(1, 0.5);      // Scale height
+                    ctx.rotate(angle * Math.PI / 180); // Rotate by current angle
+
+                    // Begin drawing path
+                    ctx.beginPath();
+                    
+                    // Draw a square
+                    ctx.rect(0, 0, 100, 100);
+
+
+                                    // ctx.rect(0, 0, 100, 100);
+                
+                // Make fill color more visible
+                ctx.fillStyle = "white";
+                ctx.fill();
+                ctx.stroke();
+                    
+                    // Increment angle and reset transformations
+                    angle+= 5;
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                }
+
+                // Call draw every second
+                setInterval(draw, 100);
+
+
+
+                // Restore the context to its original state
+                ctx.restore();
+                
+            })
+        </script>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+    </body>
+</html>

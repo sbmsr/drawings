@@ -1,40 +1,98 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script type="text/javascript">
-            document.addEventListener("DOMContentLoaded", () => {
-                let canvas = document.getElementById("canvas");
-                let ctx = canvas.getContext("2d");
-                // Set canvas size
-                canvas.width = 400;
-                canvas.height = 400;
+  <head>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        // Set canvas size
+        canvas.width = 700;
+        canvas.height = 700;
 
-                // Save the current context state
-                ctx.save();
+        // Save the current context state
+        ctx.save();
 
-                // Apply simpler isometric transformation
-                ctx.translate(200, 50); // Move to center of canvas
-                ctx.scale(1, 0.5);      // Scale height
-                ctx.rotate(45 * Math.PI / 180); // Rotate by 45 degrees
+        function drawIsometricPlane() {
+          // Reset the context state
+          ctx.restore();
+          ctx.save();
+          // Clear the canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Begin drawing path
-                ctx.beginPath();
-                
-                // Draw a square at (0,0) instead of (150,150)
-                ctx.rect(0, 0, 100, 100);
-                
-                // Make fill color more visible
-                ctx.fillStyle = "white";
-                ctx.fill();
-                ctx.stroke();
+          // Apply isometric transformations
+          ctx.scale(1, 0.5); // Scale height
+          ctx.rotate((45 * Math.PI) / 180); // Rotate by 45 degrees
+          ctx.translate(canvas.width, 11 * 20); // Move to center of canvas
 
-                // Restore the context to its original state
-                ctx.restore();
-                
-            })
-        </script>
-    </head>
-    <body>
-        <canvas id="canvas"></canvas>
-    </body>
+          // Draw vertical grid lines
+          for (var x = -canvas.width * 2; x <= canvas.width * 2; x += 20) {
+            ctx.beginPath();
+            ctx.moveTo(x, -1000);
+            ctx.lineTo(x, canvas.width + 1000);
+            ctx.stroke();
+          }
+
+          // Draw horizontal grid lines
+          for (var y = -canvas.height * 2; y <= canvas.height * 2; y += 20) {
+            ctx.beginPath();
+            ctx.moveTo(-1000, y);
+            ctx.lineTo(canvas.height + 1000, y);
+            ctx.stroke();
+          }
+        }
+
+        function drawCube(x, y, s = 1) {
+          // draw top (blue)
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, y + 20 * s);
+          ctx.lineTo(x + 20 * s, y + 20 * s);
+          ctx.lineTo(x + 20 * s, y);
+          ctx.closePath();
+          ctx.fillStyle = "rgba(0, 0, 255, 1)";
+          ctx.fill();
+          ctx.stroke();
+
+          // draw left (red)
+          ctx.beginPath();
+          ctx.moveTo(x, y + 20 * s);
+          ctx.lineTo(x + 20 * s, y + 40 * s);
+          ctx.lineTo(x + 40 * s, y + 40 * s);
+          ctx.lineTo(x + 20 * s, y + 20 * s);
+          ctx.closePath();
+          ctx.fillStyle = "rgba(255, 0, 0, 1)";
+          ctx.fill();
+          ctx.stroke();
+
+          // draw right (green)
+          ctx.beginPath();
+          ctx.moveTo(x + 20 * s, y); // top left
+          ctx.lineTo(x + 40 * s, y + 20 * s); // bottom left
+          ctx.lineTo(x + 40 * s, y + 40 * s); // bottom right
+          ctx.lineTo(x + 20 * s, y + 20 * s); // top right
+          ctx.closePath();
+          ctx.fillStyle = "rgba(0, 255, 0, 1)";
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        drawIsometricPlane();
+
+        let scale = 1;
+        let growing = true;
+
+        function draw() {
+          drawIsometricPlane();
+          drawCube(-canvas.width / 2 - 10, -canvas.height / 2 - 10, scale);
+
+          //   setTimeout(draw, 10);
+        }
+
+        draw();
+      });
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas" style="border: black solid 1px"></canvas>
+  </body>
 </html>
