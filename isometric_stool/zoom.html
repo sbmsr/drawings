@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        // Set canvas size
+        canvas.width = 700;
+        canvas.height = 700;
+
+        // Apply isometric transformations
+        ctx.scale(1, 0.5); // Scale height
+        ctx.rotate((45 * Math.PI) / 180); // Rotate by 45 degrees
+        ctx.translate(canvas.width / 2 + 100, canvas.height / 2 - 100); // Move to center of canvas
+
+        // Save the current context state
+        ctx.save();
+
+        function drawIsometricPlane(SCALE = 70) {
+          // Reset the context state
+          ctx.restore();
+          ctx.save();
+          
+          // Clear the entire canvas by resetting transform first
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width * 2, canvas.height * 2);
+          
+          // Reapply the isometric transformations
+          ctx.scale(1, 0.5);
+          ctx.rotate((45 * Math.PI) / 180);
+          ctx.translate(canvas.width / 2 + 100, canvas.height / 2 - 100);
+
+          // Draw vertical grid lines
+          for (var x = -canvas.width * 2; x <= canvas.width * 2; x += SCALE) {
+            ctx.beginPath();
+            ctx.moveTo(x, -1000);
+            ctx.lineTo(x, canvas.width + 1000);
+            ctx.stroke();
+          }
+
+          // Draw horizontal grid lines
+          for (var y = -canvas.height * 2; y <= canvas.height * 2; y += SCALE) {
+            ctx.beginPath();
+            ctx.moveTo(-1000, y);
+            ctx.lineTo(canvas.height + 1000, y);
+            ctx.stroke();
+          }
+        }
+
+        function drawIsoRect(
+          {
+            x = 0,
+            y = 0,
+            l = 1,
+            w = 1,
+            h = 1,
+            c = { top: "rgba(0, 0, 255, 1)", left: "rgba(255, 0, 0, 1)", right: "rgba(0, 255, 0, 1)" },
+          } = {},
+          SCALE = 70
+        ) {
+          // Reset the context state
+          ctx.restore();
+          ctx.save();
+          // draw top (blue)
+          ctx.beginPath();
+          ctx.moveTo(x, y); // top
+          ctx.lineTo(x, y + SCALE * l); // left
+          ctx.lineTo(x + SCALE * w, y + SCALE * l); //bottom
+          ctx.lineTo(x + SCALE * w, y); // right
+          ctx.closePath();
+          ctx.fillStyle = c.top;
+          ctx.fill();
+          ctx.stroke();
+
+          // draw left (red)
+          ctx.beginPath();
+          ctx.moveTo(x, y + SCALE * l); // start at top left
+          ctx.lineTo(x + SCALE * h, y + SCALE * l + SCALE * h); // bottom-left
+          ctx.lineTo(x + SCALE * w + SCALE * h, y + SCALE * l + SCALE * h); // Across to bottom-right
+          ctx.lineTo(x + SCALE * w, y + SCALE * l); // Across to bottom-right
+          ctx.closePath();
+          ctx.fillStyle = c.left;
+          ctx.fill();
+          ctx.stroke();
+
+          // draw right (green)
+          ctx.beginPath();
+          ctx.moveTo(x + SCALE * w, y + SCALE * l); // start at bottom of top face
+          ctx.lineTo(x + SCALE * w + h * SCALE, y + SCALE * l + h * SCALE); // go down
+          ctx.lineTo(x + SCALE * w + h * SCALE, y + SCALE * h); // go up and right
+          ctx.lineTo(x + SCALE * w, y); // go to top-right
+          ctx.closePath();
+          ctx.fillStyle = c.right;
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        function drawZoomingStool() {
+          let SCALE = 1;
+          let isGrowing = true;
+
+          setInterval(() => {
+            if (SCALE === 1) {
+              isGrowing = true;
+            }
+            if (SCALE >= 70) {
+              isGrowing = false;
+            }
+
+            if (isGrowing) {
+              SCALE += 1;
+            } else {
+              SCALE -= 1;
+            }
+
+            {
+              drawIsometricPlane(SCALE);
+              drawIsoRect({ x: 0 * SCALE, y: -6 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // back right leg
+              drawIsoRect({ x: 0 * SCALE, y: -5 * SCALE, l: 2, w: 3, h: 1, c: { top: "orange" } }, SCALE); // right plank
+              drawIsoRect({ x: 2 * SCALE, y: -3 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // middle front leg
+              drawIsoRect({ x: 0 * SCALE, y: -3 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // middle back leg
+              drawIsoRect({ x: 0 * SCALE, y: -2 * SCALE, l: 2, w: 3, h: 1, c: { top: "orange" } }, SCALE); // left plank
+              drawIsoRect({ x: 3 * SCALE, y: -1 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // left front leg
+              drawIsoRect({ x: 3 * SCALE, y: -5 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // right front leg
+              drawIsoRect({ x: 0, y: 0, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // left back leg
+            }
+          }, 100);
+        }
+
+        drawZoomingStool();
+      });
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas" style="border: black solid 1px"></canvas>
+  </body>
+</html>
