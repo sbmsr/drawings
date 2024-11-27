@@ -9,10 +9,13 @@
         canvas.width = 700;
         canvas.height = 700;
 
+        const SCALE = 70
+
         // Apply isometric transformations
         ctx.scale(1, 0.5); // Scale height
         ctx.rotate((45 * Math.PI) / 180); // Rotate by 45 degrees
-        ctx.translate(canvas.width, 11 * 20); // Move to center of canvas
+        ctx.translate(canvas.width/2 + 100, canvas.height/2 - 100); // Move to center of canvas
+        
 
         // Save the current context state
         ctx.save();
@@ -25,7 +28,7 @@
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           // Draw vertical grid lines
-          for (var x = -canvas.width * 2; x <= canvas.width * 2; x += 20) {
+          for (var x = -canvas.width * 2; x <= canvas.width * 2; x += SCALE) {
             ctx.beginPath();
             ctx.moveTo(x, -1000);
             ctx.lineTo(x, canvas.width + 1000);
@@ -33,7 +36,7 @@
           }
 
           // Draw horizontal grid lines
-          for (var y = -canvas.height * 2; y <= canvas.height * 2; y += 20) {
+          for (var y = -canvas.height * 2; y <= canvas.height * 2; y += SCALE) {
             ctx.beginPath();
             ctx.moveTo(-1000, y);
             ctx.lineTo(canvas.height + 1000, y);
@@ -55,9 +58,9 @@
           // draw top (blue)
           ctx.beginPath();
           ctx.moveTo(x, y); // top
-          ctx.lineTo(x, y + 20 * l); // left
-          ctx.lineTo(x + 20 * w, y + 20 * l); //bottom
-          ctx.lineTo(x + 20 * w, y); // right
+          ctx.lineTo(x, y + SCALE * l); // left
+          ctx.lineTo(x + SCALE * w, y + SCALE * l); //bottom
+          ctx.lineTo(x + SCALE * w, y); // right
           ctx.closePath();
           ctx.fillStyle = c.top;
           ctx.fill();
@@ -65,10 +68,10 @@
 
           // draw left (red)
           ctx.beginPath();
-          ctx.moveTo(x, y + 20 * l); // start at top left
-          ctx.lineTo(x + 20 * h, y + 20 * l + 20 * h); // bottom-left
-          ctx.lineTo(x + 20 * w + 20 * h, y + 20 * l + 20 * h); // Across to bottom-right
-          ctx.lineTo(x + 20 * w, y + 20 * l); // Across to bottom-right
+          ctx.moveTo(x, y + SCALE * l); // start at top left
+          ctx.lineTo(x + SCALE * h, y + SCALE * l + SCALE * h); // bottom-left
+          ctx.lineTo(x + SCALE * w + SCALE * h, y + SCALE * l + SCALE * h); // Across to bottom-right
+          ctx.lineTo(x + SCALE * w, y + SCALE * l); // Across to bottom-right
           ctx.closePath();
           ctx.fillStyle = c.left;
           ctx.fill();
@@ -76,10 +79,10 @@
 
             // draw right (green)
             ctx.beginPath();
-            ctx.moveTo(x + 20 * w, y + 20 * l); // start at bottom of top face
-            ctx.lineTo(x + 20 * w + h * 20, y + 20 * l+ h * 20); // go down
-            ctx.lineTo(x + 20 * w + h * 20, y + 20 * h); // go up and right
-            ctx.lineTo(x + 20 * w, y); // go to top-right
+            ctx.moveTo(x + SCALE * w, y + SCALE * l); // start at bottom of top face
+            ctx.lineTo(x + SCALE * w + h * SCALE, y + SCALE * l+ h * SCALE); // go down
+            ctx.lineTo(x + SCALE * w + h * SCALE, y + SCALE * h); // go up and right
+            ctx.lineTo(x + SCALE * w, y); // go to top-right
             ctx.closePath();
             ctx.fillStyle = c.right;
             ctx.fill();
@@ -89,14 +92,14 @@
         function drawStool() {
           drawIsometricPlane();
           {
-            drawIsoRect({ x: 60, y: 80, l: 1, w: 1, h: 4, c: { top: "white" } }); // back right leg
-            drawIsoRect({ x: 60, y: 100, l: 2, w: 3, h: 1, c: { top: "white" } }); // right plank
-            drawIsoRect({ x: 100, y: 140, l: 1, w: 1, h: 4, c: { top: "white" } }); // middle front leg
-            drawIsoRect({ x: 60, y: 140, l: 1, w: 1, h: 4, c: { top: "white" } }); // middle back leg
-            drawIsoRect({ x: 60, y: 160, l: 2, w: 3, h: 1, c: { top: "white" } }); // left plank
-            drawIsoRect({ x: 120, y: 180, l: 1, w: 1, h: 4, c: { top: "white" } }); // left front leg
-            drawIsoRect({ x: 120, y: 100, l: 1, w: 1, h: 4, c: { top: "white" } }); // right front leg
-            drawIsoRect({ x: 60, y: 200, l: 1, w: 1, h: 4, c: { top: "white" } }); // left back leg
+            drawIsoRect({ x: 0 * SCALE, y: -6 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }); // back right leg
+            drawIsoRect({ x: 0 * SCALE, y: -5 * SCALE, l: 2, w: 3, h: 1, c: { top: "orange" } }); // right plank
+            drawIsoRect({ x: 2 * SCALE, y: -3 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }); // middle front leg
+            drawIsoRect({ x: 0 * SCALE, y: -3 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }); // middle back leg
+            drawIsoRect({ x: 0 * SCALE, y: -2 * SCALE, l: 2, w: 3, h: 1, c: { top: "orange" } }); // left plank
+            drawIsoRect({ x: 3 * SCALE, y: -1 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }); // left front leg
+            drawIsoRect({ x: 3 * SCALE, y: -5 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }); // right front leg
+            drawIsoRect({ x: 0, y: 0, l: 1, w: 1, h: 4, c: { top: "orange" } }); // left back leg
           }
         }
 
