@@ -100,7 +100,7 @@
           let SCALE = 1;
           let isGrowing = true;
 
-          setInterval(() => {
+          let animateStool = () => {
             if (SCALE === 1) {
               isGrowing = true;
             }
@@ -125,7 +125,11 @@
               drawIsoRect({ x: 3 * SCALE, y: -5 * SCALE, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // right front leg
               drawIsoRect({ x: 0, y: 0, l: 1, w: 1, h: 4, c: { top: "orange" } }, SCALE); // left back leg
             }
-          }, 100);
+
+            requestAnimationFrame(animateStool);
+          };
+
+          requestAnimationFrame(animateStool);
         }
 
         drawZoomingStool();
