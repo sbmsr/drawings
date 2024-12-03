@@ -1,0 +1,10 @@
+---
+layout: base.njk
+title: "seb's drawings"
+---
+<h1>{{ title }}</h1>
+<ul>
+{%- for drawing in collections.drawings -%}
+    <li>{{ drawing.date | formatDate }} - <a href="{{ drawing.url }}">{{ drawing.fileSlug }}</a></li>
+{%- endfor -%}
+</ul>
