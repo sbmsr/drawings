@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html data-date="2024-12-10">
+  <head>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        // Set canvas size
+        canvas.width = 700;
+        canvas.height = 700;
+
+        const SCALE = 70;
+
+        // Apply isometric transformations
+        ctx.scale(1, 0.5); // Scale height
+        ctx.rotate((45 * Math.PI) / 180); // Rotate by 45 degrees
+        ctx.translate(canvas.width / 2 + 100, canvas.height / 2 - 100); // Move to center of canvas
+
+        // Save the current context state
+        ctx.save();
+
+        function drawIsometricPlane() {
+          // Reset the context state
+          ctx.restore();
+          ctx.save();
+          
+          // Reset transformation matrix before clearing
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          // Clear the canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          // Reapply isometric transformations
+          ctx.scale(1, 0.5);
+          ctx.rotate((45 * Math.PI) / 180);
+          ctx.translate(canvas.width / 2 + 100, canvas.height / 2 - 100);
+
+          // Draw vertical grid lines
+          for (var x = -canvas.width * 2; x <= canvas.width * 2; x += SCALE) {
+            ctx.beginPath();
+            ctx.moveTo(x, -1000);
+            ctx.lineTo(x, canvas.width + 1000);
+            ctx.stroke();
+          }
+
+          // Draw horizontal grid lines
+          for (var y = -canvas.height * 2; y <= canvas.height * 2; y += SCALE) {
+            ctx.beginPath();
+            ctx.moveTo(-1000, y);
+            ctx.lineTo(canvas.height + 1000, y);
+            ctx.stroke();
+          }
+        }
+
+        function drawIsoCube({
+          x = 0,
+          y = 0,
+          h = 0.5,
+          c = { top: "rgba(0, 0, 255, 1)", left: "rgba(255, 0, 0, 1)", right: "rgba(0, 255, 0, 1)" },
+        } = {}) {
+          // Reset the context state
+          ctx.restore();
+          ctx.save();
+
+          // draw left (red)
+          ctx.beginPath();
+          ctx.moveTo(x, y); // start at bottom right
+          ctx.lineTo(x - SCALE, y); // Over to bottom-left
+          ctx.lineTo(x - SCALE - SCALE * h, y - SCALE * h); // Up to top-left
+          ctx.lineTo(x - SCALE * h, y - SCALE * h); // Across to top-right
+          ctx.closePath();
+          ctx.fillStyle = c.left;
+          ctx.fill();
+          ctx.stroke();
+
+          // draw right (green)
+          ctx.beginPath();
+          ctx.moveTo(x, y); // start at bottom right
+          ctx.lineTo(x, y - SCALE); // Up to top-right
+          ctx.lineTo(x - SCALE * h, y - SCALE - SCALE * h); // Up and left to top
+          ctx.lineTo(x - SCALE * h, y - SCALE * h); // Down to bottom-left
+          ctx.closePath();
+          ctx.fillStyle = c.right;
+          ctx.fill();
+          ctx.stroke();
+
+          // draw top (blue)
+          ctx.beginPath();
+          ctx.moveTo(x - SCALE * h, y - SCALE * h); // start at top left
+          ctx.lineTo(x - SCALE - SCALE * h, y - SCALE * h); // left
+          ctx.lineTo(x - SCALE - SCALE * h, y - SCALE - SCALE * h); // top
+          ctx.lineTo(x - SCALE * h, y - SCALE - SCALE * h); // right
+          ctx.closePath();
+          ctx.fillStyle = c.top;
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        function draw() {
+          let t = 0;
+          setInterval(() => {
+            drawIsometricPlane();
+
+            let cubes = 10;
+            for (let x = 0; x <= cubes; x++) {
+              const h = (Math.cos(t + x * 0.5) + 1) / 2;
+              drawIsoCube({ x: x * SCALE, y: SCALE, h: h });
+            }
+            
+            t += 0.1;
+          }, 10);
+        }
+
+        draw();
+      });
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas" style="border: black solid 1px"></canvas>
+  </body>
+</html>
