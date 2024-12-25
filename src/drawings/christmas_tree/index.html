@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html data-date="2024-12-25">
+  <head>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        // Set canvas size
+        canvas.width = 400;
+        canvas.height = 400;
+
+        ctx.save();
+
+        let angle = 0;
+
+        let stars = [];
+        for(let i = 0; i < 50; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                brightness: Math.random(),
+            });
+        }
+
+        function draw() {
+            // Fill black background
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw stars
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness})`;
+                ctx.arc(star.x, star.y, 1, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw tree
+            let x = canvas.width/2;
+            for (let y = 0; y < 400; y++) {
+                ctx.beginPath();
+                ctx.strokeStyle = Math.floor(angle) % 4 === 1 ? "green" : "red";
+                ctx.moveTo(x, y - 1);
+                x += y * 0.4 * Math.sin(y + angle);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+
+            angle += 0.1;
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+      });
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+  </body>
+</html>
