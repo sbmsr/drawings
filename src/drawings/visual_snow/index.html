@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html data-date="2024-12-26">
+  <head>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+
+        // Set canvas size
+        const WIDTH = (canvas.width = window.innerWidth - 20);
+        const HEIGHT = (canvas.height = window.innerHeight - 20);
+
+        // Fill black background
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const TOTAL_DOTS = Math.max(WIDTH, HEIGHT) * 6
+
+        // Generate Dots
+        let dots = new Array(TOTAL_DOTS).fill(0).map((d) => {
+          return {
+            x: Math.random() * WIDTH,
+            y: Math.random() * HEIGHT,
+            velocity: {
+              xSlope: Math.random(10) * (Math.random() > 0.5 ? -1 : 1),
+              ySlope: Math.random(10) * (Math.random() > 0.5 ? -1 : 1),
+              magnitude: Math.random(),
+            },
+          };
+        });
+
+        function calculateNewDot(step, dot) {
+          let { x, y, velocity } = dot;
+
+          let { xSlope, ySlope, magnitude } = velocity;
+
+          return {
+            x: Math.abs((x + xSlope * magnitude * step) % WIDTH),
+            y: Math.abs((y + ySlope * magnitude * step) % HEIGHT),
+            velocity,
+          };
+        }
+
+        let step = 0;
+
+        function draw() {
+          for (let dot of dots) {
+            ctx.fillStyle = "white";
+            let { x, y } = calculateNewDot(step, dot);
+            ctx.fillRect(x, y, 2, 2);
+          }
+
+          requestAnimationFrame(draw);
+          step += 1;
+
+          if (step % 2 === 0) {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+        }
+
+        draw();
+      });
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+  </body>
+</html>
