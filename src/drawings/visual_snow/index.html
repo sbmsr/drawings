@@ -14,7 +14,7 @@
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const TOTAL_DOTS = Math.max(WIDTH, HEIGHT)
+        const TOTAL_DOTS = Math.max(WIDTH, HEIGHT) * 25
 
         // Generate Dots
         let dots = new Array(TOTAL_DOTS).fill(0).map((d) => {
@@ -44,6 +44,10 @@
         let step = 0;
 
         function draw() {
+          // clear the canvas
+          ctx.fillStyle = "black";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
           for (let dot of dots) {
             ctx.fillStyle = "white";
             let { x, y } = calculateNewDot(step, dot);
@@ -51,12 +55,7 @@
           }
 
           requestAnimationFrame(draw);
-          step += 1;
-
-          if (step % 2 === 0) {
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-          }
+          step += 1; 
         }
 
         draw();
