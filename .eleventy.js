@@ -29,6 +29,11 @@ module.exports = function(eleventyConfig) {
 
     // Add the metadata generation to the beforeBuild event
     eleventyConfig.on('beforeBuild', () => {
+        // Skip metadata generation in watch/serve mode
+        if (process.argv.includes('--serve')) {
+            return;
+        }
+
         const drawingsDir = path.join(__dirname, 'src', 'drawings');
         const dataDir = path.join(__dirname, 'src', '_data');
 
