@@ -14,6 +14,15 @@
         const ANGLE_STEPS = 360;
         const radii = new Array(ANGLE_STEPS).fill(1);
 
+        // Max radius before hitting the canvas edge at a given angle
+        function maxRadiusAtAngle(angleRad) {
+          const cosA = Math.cos(angleRad);
+          const sinA = Math.sin(angleRad);
+          const tx = cosA !== 0 ? 200 / Math.abs(cosA) : Infinity;
+          const ty = sinA !== 0 ? 200 / Math.abs(sinA) : Infinity;
+          return Math.min(tx, ty) - 2;
+        }
+
         // Get the accumulated radius at a given angle (in radians)
         function getRadius(angleRad) {
           const idx = ((Math.round(angleRad * ANGLE_STEPS / (Math.PI * 2)) % ANGLE_STEPS) + ANGLE_STEPS) % ANGLE_STEPS;
@@ -28,7 +37,9 @@
           for (let d = -spread; d <= spread; d++) {
             const idx = ((idxCenter + d) % ANGLE_STEPS + ANGLE_STEPS) % ANGLE_STEPS;
             const falloff = 1 - Math.abs(d) / (spread + 1);
-            radii[idx] = Math.max(0, radii[idx] + amount * falloff);
+            const idxAngle = (idx / ANGLE_STEPS) * Math.PI * 2;
+            const maxR = maxRadiusAtAngle(idxAngle);
+            radii[idx] = Math.max(0, Math.min(maxR, radii[idx] + amount * falloff));
           }
         }
 
