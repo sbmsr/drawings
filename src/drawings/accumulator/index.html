@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html data-date="2025-01-27">
+  <head>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        canvas.width = 400;
+        canvas.height = 400;
+
+        const cx = 200, cy = 200;
+        const ANGLE_STEPS = 360;
+
+        const LAYERS = [
+          { radii: new Array(ANGLE_STEPS).fill(1), color: "#000" },
+        ];
+
+        function getOrCreateLayer(idx) {
+          while (LAYERS.length <= idx) {
+            const color = LAYERS.length % 2 === 0 ? "#000" : "#fff";
+            LAYERS.push({ radii: new Array(ANGLE_STEPS).fill(1), color });
+          }
+          return LAYERS[idx];
+        }
+
+        function maxRadiusAtAngle(angleRad) {
+          const cosA = Math.cos(angleRad);
+          const sinA = Math.sin(angleRad);
+          const tx = cosA !== 0 ? 200 / Math.abs(cosA) : Infinity;
+          const ty = sinA !== 0 ? 200 / Math.abs(sinA) : Infinity;
+          return Math.min(tx, ty) - 2;
+        }
+
+        function angleToIdx(angleRad) {
+          return ((Math.round(angleRad * ANGLE_STEPS / (Math.PI * 2)) % ANGLE_STEPS) + ANGLE_STEPS) % ANGLE_STEPS;
+        }
+
+        function getRadius(layer, angleRad) {
+          return layer.radii[angleToIdx(angleRad)];
+        }
+
+        function grow(layer, angleRad, amount, outerLayer) {
+          const spread = 6;
+          const idxCenter = angleToIdx(angleRad);
+          for (let d = -spread; d <= spread; d++) {
+            const idx = ((idxCenter + d) % ANGLE_STEPS + ANGLE_STEPS) % ANGLE_STEPS;
+            const falloff = 1 - Math.abs(d) / (spread + 1);
+            const idxAngle = (idx / ANGLE_STEPS) * Math.PI * 2;
+            const maxR = outerLayer
+              ? Math.min(maxRadiusAtAngle(idxAngle), outerLayer.radii[idx])
+              : maxRadiusAtAngle(idxAngle);
+            layer.radii[idx] = Math.max(0, Math.min(maxR, layer.radii[idx] + amount * falloff));
+          }
+        }
+
+        function drawLayer(layer) {
+          ctx.beginPath();
+          for (let i = 0; i < ANGLE_STEPS; i++) {
+            const angle = (i / ANGLE_STEPS) * Math.PI * 2;
+            const r = layer.radii[i];
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.fillStyle = layer.color;
+          ctx.fill();
+        }
+
+        function randomEdgePoint() {
+          const edge = Math.floor(Math.random() * 4);
+          let x, y;
+          if (edge === 0) { x = Math.random() * 400; y = 0; }
+          else if (edge === 1) { x = 400; y = Math.random() * 400; }
+          else if (edge === 2) { x = Math.random() * 400; y = 400; }
+          else { x = 0; y = Math.random() * 400; }
+          return { x, y };
+        }
+
+        const dots = [];
+        const DOT_SPEED = () => 11;
+        const DOT_RADIUS = 1;
+
+        function spawnDot() {
+          const { x, y } = randomEdgePoint();
+          // lastLayerIdx tracks the outermost layer boundary the dot has already crossed
+          dots.push({ x, y, lastLayerIdx: -1 });
+        }
+
+        let spawnAccum = 0;
+        window.__spawnRate = 0.2; // dots per frame
+
+        function loop() {
+          ctx.clearRect(0, 0, 400, 400);
+
+          // Draw outermost to innermost so inner layers cut through outer ones
+          for (let i = 0; i < LAYERS.length; i++) drawLayer(LAYERS[i]);
+
+          spawnAccum += window.__spawnRate;
+          while (spawnAccum >= 1) { spawnDot(); spawnAccum--; }
+
+          for (let i = dots.length - 1; i >= 0; i--) {
+            const dot = dots[i];
+
+            const dx = cx - dot.x;
+            const dy = cy - dot.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 1) { dots.splice(i, 1); continue; }
+
+            const contactAngle = Math.atan2(dot.y - cy, dot.x - cx);
+
+            // Sweep: check all layers the dot crosses during this step
+            const step = Math.min(DOT_SPEED(), dist);
+            const newDist = dist - step;
+            let nextLayerIdx = dot.lastLayerIdx + 1;
+            let nextLayer = getOrCreateLayer(nextLayerIdx);
+            let nextRadius = getRadius(nextLayer, contactAngle);
+            while (newDist <= nextRadius + DOT_RADIUS && dist > nextRadius + DOT_RADIUS) {
+              const amount = 4 * Math.pow(0.85, nextLayerIdx);
+              if (amount < 0.01) break;
+              const outerLayer = nextLayerIdx > 0 ? LAYERS[nextLayerIdx - 1] : null;
+              grow(nextLayer, contactAngle, amount, outerLayer);
+              dot.lastLayerIdx = nextLayerIdx;
+              nextLayerIdx++;
+              nextLayer = getOrCreateLayer(nextLayerIdx);
+              nextRadius = getRadius(nextLayer, contactAngle);
+            }
+
+            // Move dot
+            dot.x += (dx / dist) * step;
+            dot.y += (dy / dist) * step;
+            if (newDist < 1) dots.splice(i, 1);
+          }
+
+          requestAnimationFrame(loop);
+        }
+
+        loop();
+      })
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-family: monospace;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="spawn">progression rate</label>
+        <input id="spawn" type="range" min="1" max="200" value="20">
+        <span id="spawn-val">2</span>
+      </div>
+    </div>
+    <script>
+
+const spawnSlider = document.getElementById("spawn");
+      const spawnLabel = document.getElementById("spawn-val");
+      spawnSlider.addEventListener("input", () => {
+        window.__spawnRate = Number(spawnSlider.value) / 10;
+        spawnLabel.textContent = window.__spawnRate.toFixed(1);
+      });
+    </script>
+  </body>
+</html>
