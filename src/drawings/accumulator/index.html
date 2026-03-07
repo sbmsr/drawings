@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html data-date="2025-01-27">
+  <head>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        canvas.width = 400;
+        canvas.height = 400;
+
+        const cx = 200, cy = 200;
+
+        // The accumulated shape is stored as a list of radii at each angle (polar grid)
+        const ANGLE_STEPS = 360;
+        const radii = new Array(ANGLE_STEPS).fill(1);
+
+        // Get the accumulated radius at a given angle (in radians)
+        function getRadius(angleRad) {
+          const idx = ((Math.round(angleRad * ANGLE_STEPS / (Math.PI * 2)) % ANGLE_STEPS) + ANGLE_STEPS) % ANGLE_STEPS;
+          return radii[idx];
+        }
+
+        // Grow the accumulated shape at the angle where contact was made
+        function grow(angleRad, amount = 4) {
+          // Spread growth across a small arc for a smooth bump
+          const spread = 6;
+          const idxCenter = Math.round(angleRad * ANGLE_STEPS / (Math.PI * 2));
+          for (let d = -spread; d <= spread; d++) {
+            const idx = ((idxCenter + d) % ANGLE_STEPS + ANGLE_STEPS) % ANGLE_STEPS;
+            const falloff = 1 - Math.abs(d) / (spread + 1);
+            radii[idx] += amount * falloff;
+          }
+        }
+
+        // Draw the accumulated center blob
+        function drawBlob() {
+          ctx.beginPath();
+          for (let i = 0; i < ANGLE_STEPS; i++) {
+            const angle = (i / ANGLE_STEPS) * Math.PI * 2;
+            const r = radii[i];
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.fillStyle = "#000";
+          ctx.fill();
+        }
+
+        // Pick a random point on the edge of the canvas
+        function randomEdgePoint() {
+          const edge = Math.floor(Math.random() * 4);
+          let x, y;
+          if (edge === 0) { x = Math.random() * 400; y = 0; }
+          else if (edge === 1) { x = 400; y = Math.random() * 400; }
+          else if (edge === 2) { x = Math.random() * 400; y = 400; }
+          else { x = 0; y = Math.random() * 400; }
+          return { x, y };
+        }
+
+        // Active traveling dots
+        const dots = [];
+        window.__dotSpeed = 10;
+        const DOT_SPEED = () => window.__dotSpeed;
+        const DOT_RADIUS = 3;
+
+        function spawnDot() {
+          const { x, y } = randomEdgePoint();
+          dots.push({ x, y });
+        }
+
+        let spawnTimer = 0;
+        window.__spawnInterval = 5; // = 61 - 56 (slider default)
+        const SPAWN_INTERVAL = () => window.__spawnInterval;
+
+        function loop() {
+          ctx.clearRect(0, 0, 400, 400);
+          drawBlob();
+
+          // Spawn new dots on interval
+          spawnTimer++;
+          if (spawnTimer >= SPAWN_INTERVAL()) {
+            spawnDot();
+            spawnTimer = 0;
+          }
+
+          // Update and draw dots
+          for (let i = dots.length - 1; i >= 0; i--) {
+            const dot = dots[i];
+            const dx = cx - dot.x;
+            const dy = cy - dot.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
+            const contactRadius = getRadius(angle + Math.PI); // angle from center to dot
+
+            if (dist <= contactRadius + DOT_RADIUS + DOT_SPEED()) {
+              // Contact: grow the blob in the direction the dot came from
+              const contactAngle = Math.atan2(dot.y - cy, dot.x - cx);
+              grow(contactAngle);
+              dots.splice(i, 1);
+            } else {
+              // Move dot toward center
+              dot.x += (dx / dist) * DOT_SPEED();
+              dot.y += (dy / dist) * DOT_SPEED();
+
+              if (!window.__dotsHidden) {
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, DOT_RADIUS, 0, Math.PI * 2);
+                ctx.fillStyle = "#000";
+                ctx.fill();
+              }
+            }
+          }
+
+          requestAnimationFrame(loop);
+        }
+
+        loop();
+      })
+    </script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-family: monospace;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="speed">dot speed</label>
+        <input id="speed" type="range" min="1" max="30" value="10">
+        <span id="speed-val">10</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label><input id="hide-dots" type="checkbox"> hide dots</label>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="spawn">spawn rate</label>
+        <input id="spawn" type="range" min="1" max="60" value="56">
+        <span id="spawn-val">56</span>
+      </div>
+    </div>
+    <script>
+      const slider = document.getElementById("speed");
+      const label = document.getElementById("speed-val");
+      slider.addEventListener("input", () => {
+        window.__dotSpeed = Number(slider.value);
+        label.textContent = slider.value;
+      });
+
+      document.getElementById("hide-dots").addEventListener("change", (e) => {
+        window.__dotsHidden = e.target.checked;
+      });
+
+      const spawnSlider = document.getElementById("spawn");
+      const spawnLabel = document.getElementById("spawn-val");
+      spawnSlider.addEventListener("input", () => {
+        // invert: higher slider value = faster spawning (lower interval)
+        window.__spawnInterval = 61 - Number(spawnSlider.value);
+        spawnLabel.textContent = spawnSlider.value;
+      });
+    </script>
+  </body>
+</html>
