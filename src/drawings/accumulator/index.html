@@ -28,7 +28,7 @@
           for (let d = -spread; d <= spread; d++) {
             const idx = ((idxCenter + d) % ANGLE_STEPS + ANGLE_STEPS) % ANGLE_STEPS;
             const falloff = 1 - Math.abs(d) / (spread + 1);
-            radii[idx] += amount * falloff;
+            radii[idx] = Math.max(0, radii[idx] + amount * falloff);
           }
         }
 
@@ -95,9 +95,9 @@
             const contactRadius = getRadius(angle + Math.PI); // angle from center to dot
 
             if (dist <= contactRadius + DOT_RADIUS + DOT_SPEED()) {
-              // Contact: grow the blob in the direction the dot came from
+              // Contact: grow or shrink the blob in the direction the dot came from
               const contactAngle = Math.atan2(dot.y - cy, dot.x - cx);
-              grow(contactAngle);
+              grow(contactAngle, window.__destructive ? -4 : 4);
               dots.splice(i, 1);
             } else {
               // Move dot toward center
@@ -130,6 +130,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <label><input id="hide-dots" type="checkbox"> hide dots</label>
+        <label><input id="destructive" type="checkbox"> destructive</label>
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <label for="spawn">spawn rate</label>
@@ -147,6 +148,9 @@
 
       document.getElementById("hide-dots").addEventListener("change", (e) => {
         window.__dotsHidden = e.target.checked;
+      });
+      document.getElementById("destructive").addEventListener("change", (e) => {
+        window.__destructive = e.target.checked;
       });
 
       const spawnSlider = document.getElementById("spawn");
